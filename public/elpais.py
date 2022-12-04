@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import psycopg2
-import requests, traceback, time
+import requests, traceback, time, json
 import pymysql
 import socket
 from classifier import *
@@ -18,6 +18,7 @@ from newspaper import Article, ArticleException
 #nltk.download('punkt')
 #from pysentimiento import create_analyzer
 #analyzer = create_analyzer(task="sentiment", lang="es")
+import createfile as create_file
 
 
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:65.0) Gecko/20100101 Firefox/65.0"
@@ -80,7 +81,7 @@ class ElpaisScrapperClass():
     #                         print(" ")
     #                         print(" ")
     #                         if (count > 5): break
-    #                         #print(" --------------------------------------------------------------------------------------------------------------------------------- ")
+    #                         #print(" --------------------------------------------------------------------- ")
     #                         print(count)
     #                         print(" ")
                             
@@ -91,12 +92,17 @@ class ElpaisScrapperClass():
         resp = requests.get("https://www.elpais.com.uy/", headers=headers)
         soup = BeautifulSoup(resp.text, "html.parser")
         if resp.status_code == 200:
-            lista = []
+            articulosElpais = []
+            listaUrls = []
             soup = BeautifulSoup(resp.content, "html.parser")
             fecha = datetime.now(timezone.utc)
+            fecha = fecha.strftime("%m/%d/%Y, %H:%M:%S")
             count = 0
             for g in soup.find_all('article', class_='articleModule'):
-
+                #print(" -- g -- ")
+                #print(g)
+                #print(" -- g -- ")
+                #print(" ")
                 for data in g.find_all('a', href=True):
                     try:
                         #print(data['href'])
@@ -126,28 +132,55 @@ class ElpaisScrapperClass():
                         #print(" ")
                         #print(imagen)
                         #print(article_text[230:].split('\t'))
-
-                        col = {
-                            "texto": article_text[230:], 
-                            "url": url,
-                            "titulo": titulo,
-                            "subtitulo": subtitulo,
-                            "imagen": imagen,
-                            "fecha": fecha,
-                            "pagina": "elpais",
-                            "posicion": count
-                        }
-                        count += 1
-                        print(" ")
-                        print(" ")
-                        #print(" --------------------------------------------------------------------------------------------------------------------------------- ")
-                        print(col)
-                        if (count > 5): break
-                        print(count)
-                        print(" ")
-                        print(" ")
+                        
+                        if url not in listaUrls:
+                            listaUrls.append(url)
+                            #
+                            nameFile = "-".join(titulo.split())
+                            nameFile = ''.join(e for e in nameFile if e.isalnum())
+                            def normalize(s):
+                                replacements = (
+                                    ("á", "a"),
+                                    ("é", "e"),
+                                    ("í", "i"),
+                                    ("ó", "o"),
+                                    ("ú", "u"),
+                                )
+                                for a, b in replacements:
+                                    s = s.replace(a, b).replace(a.upper(), b.upper())
+                                return s
+                            nameFile = normalize((nameFile.lower()))
+                            col = {
+                                "texto": article_text[230:], 
+                                "url": url,
+                                "titulo": titulo,
+                                "subtitulo": subtitulo,
+                                "imagen": imagen,
+                                "fecha": fecha,
+                                "pagina": "elpais",
+                                "posicion": count,
+                                "nameFile" : nameFile + ".html"
+                            }
+                            articulosElpais.append(col)
+                            count += 1
+                            create_file.createFile(subtitulo, imagen, url, titulo, article_text[230:])
+                            #print(" ")
+                            #print(" ")
+                            #print(col)
+                            col = {}
+                            #if (count > 5): break
+                            print(count)
+                            print(" ")
+                            print(" ")
+                            #break
                     except: print(traceback.format_exc())
-                if (count > 5): break
+                #if (count > 5): break
+            # end for
+            now = datetime.now()
+            current_time = now.strftime("%H:%M:%S")
+            final = json.dumps(articulosElpais, indent=2)
+            with open("articulosElpais-"+ str(current_time) +".json",'w', encoding = 'utf-8') as f:
+                f.write(str(final))
 
 
 if __name__ == "__main__":  
