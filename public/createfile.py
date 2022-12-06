@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 
 def createFile(description, image, url, title, content):
+    content = content.replace(".", ".<br><br>")
     contentFile = """
     <!DOCTYPE html>
     <html>
@@ -34,6 +35,7 @@ def createFile(description, image, url, title, content):
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <title>{title}</title>
         <link rel="stylesheet" href="bootstrap.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
     </head>
     <body>
         <div class="container">
@@ -53,6 +55,9 @@ def createFile(description, image, url, title, content):
                 {content}
                 <br>
                 <br>
+                <p>
+                    fuente: <a href="{url}">{url}</a>
+                </p>
             </div>
         </div>
         </div>
