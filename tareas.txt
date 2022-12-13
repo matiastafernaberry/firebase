@@ -1,0 +1,3 @@
+34,2 MiB el 07 diciembre 2022 peso total de la carpeta firebase
+25,5 MiB el 08 diciembre 2022 peso total de la carpeta firebase
+acceder archivos o paginas de otros dias desde la pagina principal de cada diario.

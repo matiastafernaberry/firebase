@@ -37,10 +37,10 @@ def createFile(description, image, url, title, content, fecha):
         <meta http-equiv="X-UA-Compatible" content="IE=edge"/>  
         
         <title>{title}</title>
-        <link rel="stylesheet" href="bootstrap.css">
-        <link rel="stylesheet" href="bootstrap-grid.css">
-        <script src="jquery-3.6.1.min.js"></script>
-        <script src="bootstrap.js"></script>
+        <link rel="stylesheet" href="../../../bootstrap.css">
+        <link rel="stylesheet" href="../../../bootstrap-grid.css">
+        <script src="../../../jquery-3.6.1.min.js"></script>
+        <script src="../../../bootstrap.js"></script>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nerko+One">
     </head>
@@ -53,10 +53,10 @@ def createFile(description, image, url, title, content, fecha):
             <div class="collapse navbar-collapse float-right justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
                 <li class="nav-item active">
-                    <a class="nav-link" href="../../elpais/index.html" style="font-family: 'Nerko One';font-size: 20px;color: #0289CB;">El País <span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="../../../../../elpais/index.html" style="font-family: 'Nerko One';font-size: 20px;color: #0289CB;">El País <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item active">
-                    <a class="nav-link" href="../../elobservador/index.html" style="font-family: 'Nerko One';font-size: 20px;color: #0289CB;">El Observador<span class="sr-only">(current)</span></a>
+                    <a class="nav-link" href="../../../../../elobservador/index.html" style="font-family: 'Nerko One';font-size: 20px;color: #0289CB;">El Observador<span class="sr-only">(current)</span></a>
                 </li>
                 
                 </ul>
@@ -68,18 +68,16 @@ def createFile(description, image, url, title, content, fecha):
                 <p>
                     <h2>{title}</h2>
                 </p>
-                <br>
+
                 <p>
                     <h3>{description}</h3>
                 </p>
-                <br>
+
                 <p>
                     <img src="{image}" alt="" class="img-fluid">
                 </p>
                 <p>{fecha}</p>
-                <br>
-                <br>
-                    <p>{content}</p>
+                <p>{content}</p>
                 <br>
                 <br>
                 <p>
@@ -119,9 +117,11 @@ def createFile(description, image, url, title, content, fecha):
     fecha = fecha.strftime("%d-%m-%Y, %H:%M:%S")
     fecha = fecha.split(",")[0]
     mes = fecha.split("-")[1]
+    dia = fecha.split("-")[0]
+    anio = fecha.split("-")[2]
     mesActual = meses[int(mes)-1]
-    fecha = fecha.split("-")[0] + mesActual + fecha.split("-")[2]
-    with codecs.open(fecha + "-" + nameFile + ".html", "w", "utf-8") as temp:
+    fecha = dia + mesActual + anio
+    with codecs.open(anio + "/" + mes + "/" + dia + "/" + nameFile + ".html", "w", "utf-8") as temp:
         temp.write(contentFile)
 
 

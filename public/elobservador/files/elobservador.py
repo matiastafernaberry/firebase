@@ -29,65 +29,7 @@ localhost = "192.168.1.122"
 
 
 class ElobservadorScrapperClass():
-    """scrapp el pais"""
-    # def get(self, request):
-    #     resp = requests.get("https://www.elpais.com.uy/", headers=headers)
-    #     soup = BeautifulSoup(resp.text, "html.parser")
-    #     if resp.status_code == 200:
-    #         lista = []
-    #         soup = BeautifulSoup(resp.content, "html.parser")
-    #         fecha = datetime.now(timezone.utc)
-    #         count = 0
-    #         for g in soup.find_all('article', class_='articleModule'):
-    #             for data in g.find_all('a', href=True):
-    #                 try:
-    #                     url = "https://www.elpais.com.uy" + data['href']
-    #                     if url not in lista:
-    #                         lista.append(url)
-    #                         article = Article(url, 'es')
-    #                         article.download()
-    #                         article.parse()
-    #                         article_text = article.text
-    #                         resp = requests.get(url, headers=headers)
-    #                         soup = BeautifulSoup(resp.content, "html.parser")
-    #                         try: titulo = soup.select('h1.title')[0].text.strip()
-    #                         except:
-    #                             titulo = "" 
-    #                             print(traceback.format_exc())
-    #                         try: subtitulo = soup.select('h2.epigraph')[0].text.strip()
-    #                         except:
-    #                             subtitulo = ""
-    #                             print(traceback.format_exc())
-    #                         try: imagen = soup.select('figure.image > img')[0]["data-src"]
-    #                         except:
-    #                             imagen = ""
-    #                             print(traceback.format_exc())
-
-    #                         #print(" ")
-    #                         #print(imagen)
-    #                         #print(article_text[230:].split('\t'))
-
-    #                         col = {
-    #                             "texto":article_text[230:], 
-    #                             "url": url,
-    #                             "titulo": titulo,
-    #                             "subtitulo": subtitulo,
-    #                             "imagen": imagen,
-    #                             "fecha": fecha,
-    #                             "pagina": "elpais",
-    #                             "posicion": count
-    #                         }
-    #                         count += 1
-    #                         print(" ")
-    #                         print(" ")
-    #                         if (count > 5): break
-    #                         #print(" --------------------------------------------------------------------- ")
-    #                         print(count)
-    #                         print(" ")
-                            
-    #                 except: print(traceback.format_exc())
-    #     return TemplateResponse(request, 'index.html', {'lista_paises': 'form'})
-
+    """scrapp el observador"""
     def scrapp(self):
         resp = requests.get("https://www.elobservador.com.uy/", headers=headers)
         soup = BeautifulSoup(resp.text, "html.parser")
@@ -177,8 +119,10 @@ class ElobservadorScrapperClass():
                         fecha = fecha.strftime("%d-%m-%Y, %H:%M:%S")
                         fecha = fecha.split(",")[0]
                         mes = fecha.split("-")[1]
+                        dia = fecha.split("-")[0]
+                        anio = fecha.split("-")[2]
                         mesActual = meses[int(mes)-1]
-                        fecha = fecha.split("-")[0] + mesActual + fecha.split("-")[2]
+                        fecha = dia + mesActual + anio
                         col = {
                             "texto": article_text, 
                             "url": url,
@@ -188,11 +132,12 @@ class ElobservadorScrapperClass():
                             "fecha": fecha,
                             "pagina": "elobservador",
                             "posicion": count,
-                            "nameFile" : "files/" + fecha + "-"  + nameFile + ".html"
+                            "nameFile" : "files/" + anio + "/" + mes + "/" + dia + "/" + nameFile + ".html"
                         }
                         articulosElpais.append(col)
                         count += 1
                         print(count)
+                        fecha = dia + " " + mesActual + " de " + anio
                         create_file.createFile(subtitulo, imagen, url, titulo, article_text, fecha)
 
 
@@ -202,19 +147,129 @@ class ElobservadorScrapperClass():
             final = json.dumps(articulosElpais, indent=2, ensure_ascii=False)
             print("  escribiendo el archivo  ")
             print("   ")
-            with open("articulosElobservador-"+ str(current_time) +".json",'w', encoding = 'utf-8') as f:
+            meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+            fecha = datetime.now(timezone.utc)
+            fecha = fecha.strftime("%d-%m-%Y, %H:%M:%S")
+            fecha = fecha.split(",")[0]
+            mes = fecha.split("-")[1]
+            anio = fecha.split("-")[2]
+            dia = fecha.split("-")[0]
+            nameFileLog = "/home/matias/Documentos/firebase/public/elobservador/files/"+ anio + "/" + mes + "/" + dia + "/" + "articulosElobservador-"+ str(current_time) +".json"
+            with open(nameFileLog,'w', encoding = 'utf-8') as f:
                 f.write(str(final))
+            return nameFileLog
+    
+
+    def createIndex(self, nameFileLOg):
+        final = ""
+        meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+        fecha = datetime.now(timezone.utc)
+        fecha = fecha.strftime("%d-%m-%Y, %H:%M:%S")
+        fecha = fecha.split(",")[0]
+        mes = fecha.split("-")[1]
+        mesActual = meses[int(mes)-1]
+        fecha = fecha.split("-")[0] + " " + mesActual + " de " + fecha.split("-")[2]
+        with open(nameFileLOg, encoding='utf-8') as fh:
+            dataJson = json.load(fh)
+        contentFile = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="utf-8">
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=devicele-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                <meta http-equiv="content-language" contconent="es" />
+                
+                <link rel="stylesheet" href="bootstrap.css">
+                <link rel="stylesheet" href="bootstrap-grid.css">
+                <script src="jquery-3.6.1.min.js"></script>
+                <script src="bootstrap.js"></script>
+                <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans">
+                <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nerko+One">
+                <title>MilangaConSalmon</title>
+            </head>
+            <body>
+                <nav class="navbar navbar-expand-lg navbar-light ">
+                <a class="navbar-brand" href="/" style="font-family: 'Nerko One';font-size: 30px;color: #0289CB;">Noticias de Uruguay y el mundo</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse float-right justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="../elpais/index.html" style="font-family: 'Nerko One';font-size: 20px;color: #0289CB;">El País <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="../elobservador/index.html" style="font-family: 'Nerko One';font-size: 20px;color: #0289CB;">El Observador<span class="sr-only">(current)</span></a>
+                    </li>
+                    </ul>
+                </div>
+                </nav>
+                <div class="container">
+                <div class="row">
+                    <div class="col-sm">
+                    <p class="intro" itemprop="description">
+                        <h3 style="color: #0289CB;font-family: 'Nerko One';">Noticias de elobservador.com.uy {fecha}</h3>
+                    </p>
+                    </div>
+                </div>
+                </div>
+                <div id="contenido">
+
+                </div>
+                <div class="container">
+                <div class="row">
+                    <div class="col-sm">
+                    
+                    </div>
+                </div>
+                </div>
+                <script>
+                const texto = {dataJson}
+                const result = JSON.stringify(texto)
+                const obj = JSON.parse(result);
+                console.log(obj);
+            """.format(
+                dataJson = dataJson,
+                fecha = fecha
+            )
+        with open("../index.html", 'w', encoding = 'utf-8') as f:
+                f.write(contentFile)
+        restOfText = """
+            var html="<div class='container'>";
+                html+= "<div class='row'>";
+                for (let value of obj) {
+                    html+= "<div class='col-xs-6 col-sm-4 col-md-4'";
+                    html+= "<p><img src="+value.imagen+" class='img-fluid'></p>";
+                    html+= "<p><a href='"+value.nameFile+"'><h4 id='titulo' style='font-weight: bold;'>"+value.titulo+"</h4></a></p>";
+                    html+= "<p><h5 id='subtitulo' style='font-family: Montserrat;'>"+value.subtitulo+"</h5></p>";
+                    html+= "<br>";
+                    html+= "</div>";
+                }
+                html+= "</div>";
+                html+= "</div>";
+                $( "#contenido" ).append( html );
+                </script>
+            </body>
+            </html>
+        """
+        with open("../index.html", 'a', encoding = 'utf-8') as f:
+                f.write(restOfText)
 
 
 if __name__ == "__main__":  
     elobservador = ElobservadorScrapperClass()
-    elobservador.scrapp()
+    nameFileLOg = elobservador.scrapp()
+    elobservador.createIndex(nameFileLOg)
+
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
     print(current_time)
 else:
     elobservador = ElobservadorScrapperClass()
-    elobservador.scrapp()
+    nameFileLOg = elobservador.scrapp()
+    elobservador.createIndex(nameFileLOg)
+
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
     print(current_time)
